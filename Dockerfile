@@ -11,8 +11,8 @@ ENV SERVICE_DIR=/ansible_service_dir \
     ANSIBLE_CONFIG=${SERVICE_DIR}/ansible.cfg
 
 RUN echo "===> Installing Ansible via pip3..." && \
-    DEBIAN_FRONTEND=noninteractive apt update && \
-    apt install -y python3-pip openssh-client vim && \
+    DEBIAN_FRONTEND=noninteractive apt-get update && \
+    apt-get install -y python3-pip openssh-client vim && \
     pip3 install ansible && \
     echo "===> Installing pip modules..." && \
     pip3 install pywinrm && \
