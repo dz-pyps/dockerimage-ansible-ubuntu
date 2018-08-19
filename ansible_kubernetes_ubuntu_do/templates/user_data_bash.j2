@@ -1,0 +1,26 @@
+#!/bin/bash
+adduser {{ user_to_create }} --disabled-password --gecos "Ansible Service User" --shell /bin/bash
+adduser {{ user_to_create }} sudo
+if [[ ! -d /home/{{ user_to_create }}/.ssh ]];then
+  mkdir /home/{{ user_to_create }}/.ssh
+fi
+
+echo '{{ user_to_create }} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/{{ user_to_create }}
+# Import public keys from your github account
+apt update
+apt install htop -y
+echo '{{ ansible_ssh_authorized_key }}' >> /home/{{ user_to_create }}/.ssh/authorized_keys
+
+chown -R {{ user_to_create }}:{{ user_to_create }} /home/{{ user_to_create }}/.ssh
+chmod 700 /home/{{ user_to_create }}/.ssh
+chmod 600 /home/{{ user_to_create }}/.ssh/authorized_keys
+
+#curl https://github.com/janusle.keys>> /home/{{ user_to_create }}/.ssh/authorized_keys
+
+# Disable root login
+#sed -i 's/^PermitRootLogin[:space:]*.*/PermitRootLogin no/g' /etc/ssh/sshd_config
+sed -i -e '/^#Port/s/^.*$/Port {{ ansible_ssh_port_do }}/' /etc/ssh/sshd_config
+sed -i -e '/^PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i -e '$aAllowUsers {{ user_to_create }}' /etc/ssh/sshd_config
+
+systemctl restart ssh

@@ -1,0 +1,29 @@
+---
+- hosts: control
+  tasks:
+    #- name: create 'vars' file for a specific group of hosts
+    #  file:
+    #    path: {{ ansible_user_dir }}/work/ansible/group_vars/{{ created_hosts_group_name }}
+    #    owner: ansible
+    #    group: ansible
+    #    mode: 0644
+
+    - name: enusre 'vars' for a specific group exists
+      copy:
+        content: ""
+        dest: "{{ service_dir }}/group_vars/{{ created_hosts_group_name }}"
+        directory_mode: yes
+        force: no
+        #owner: "{{ lookup('env','USER') }}"
+        #group: "{{ lookup('env','USER') }}"
+        mode: 0644
+
+    - name: put appropriate content into a specific group's var file
+      blockinfile:
+        path: "{{ service_dir }}/group_vars/{{ created_hosts_group_name }}"
+        block: |
+          ansible_python_interpreter: /usr/bin/env python3
+          ssh_port: "{{ ansible_ssh_port_do | default('57022') }}"
+          service_dir: "{{ service_dir }}"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK for '[{{ created_hosts_group_name }}]' group"
+

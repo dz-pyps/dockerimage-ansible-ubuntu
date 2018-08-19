@@ -1,0 +1,17 @@
+---
+# API TOKEN
+do_api_token: YOUR_DIGITAL_OCEAN_TOKEN
+
+# Digital ocean specific variables
+droplets:
+  - { name: kubernetes-node-02, region: lon1, memory_size: 2gb, imageid: ubuntu-18-04-x64 }
+  - { name: kubernetes-node-03, region: lon1, memory_size: 2gb, imageid: ubuntu-18-04-x64 }
+ansible_ssh_port_do: 9999
+user_to_create: ubuntu
+
+# Service vars
+#service_dir: "{{ ansible_user_dir }}/work/kubernetes-course/ansible_kubernetes"
+service_dir: "{{ lookup('env','PWD') }}"
+ansible_ssh_authorized_key: "{{ lookup('file', '{{ ansible_user_dir }}/.ssh/id_rsa.pub') }}"
+ansible_known_hosts_file_content: "{{ lookup('file', '{{ ansible_user_dir }}/.ssh/known_hosts') }}"
+created_hosts_group_name: "kubernetes_do"

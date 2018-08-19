@@ -1,0 +1,5 @@
+# BEGIN ANSIBLE MANAGED BLOCK for '[kubernetes_do]' group
+ansible_python_interpreter: /usr/bin/env python3
+ssh_port: "9999"
+service_dir: "/ansible_workflows"
+# END ANSIBLE MANAGED BLOCK for '[kubernetes_do]' group

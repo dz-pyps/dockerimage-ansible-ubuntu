@@ -1,0 +1,21 @@
+---
+- name: "'ansible-ping' newly-created droplet(s)"
+  hosts: "{{ hosts_to_ping_or_check }}"
+  tasks:
+    - name: ping newly created host(s)
+      ping:
+      register: ping_results
+
+    - name: print python version
+      shell: python3 -V; python -V
+      ignore_errors: yes
+      register: shell_results
+
+    - name: print results
+      debug:
+        msg: "Ping results: {{ ping_results }}"
+
+    - name: print results
+      debug:
+        msg: "'Print python version' results: {{ shell_results.stdout_lines }}"
+

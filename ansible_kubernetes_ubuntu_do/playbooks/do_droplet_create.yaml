@@ -1,0 +1,103 @@
+---
+- name: Launch Digital Ocean droplet(s)
+  hosts: control
+  tasks: 
+    #- name: get ssh keys
+    #  get_url:
+    #    url: https://api.digitalocean.com/v2/account/keys
+    #    dest: /tmp/ansible_get_url.tmp
+    #    headers: 'Authorization: Bearer {{ do_api_token }}'
+    #  #shell: "curl -X GET -H 'Content-Type: application/json' -H 'Authorization: Bearer {{ do_api_token }}' 'https://api.digitalocean.com/v2/account/keys' | jq '.ssh_keys[] | select(.name == 'ansible@ansiblecm')' | jq .id"
+
+    #- name: find ansible key    
+    #  shell: cat /tmp/ansible_get_url.tmp | jq '.ssh_keys[] | select(.name == "{{ ansible_user_id }}@{{ ansible_host }}")' | jq .id
+    #  register: key_id
+
+    #- name: print ssh key ID
+    #  debug:
+    #    var: key_id.stdout
+
+    - name: "Provision new droplet(s)"
+      digital_ocean:
+        state: present
+        command: droplet
+        name: "{{ item.name }}"
+        unique_name: yes
+        api_token: "{{ do_api_token }}"
+        size_id: "{{ item.memory_size }}"
+        region_id: "{{ item.region }}"
+        image_id: "{{ item.imageid }}"
+        #ssh_key_ids: "{{ key_id.stdout }}"
+        #user_data: "{{ lookup('template', '{{ service_dir }}/templates/user_data_bash.j2') }}" 
+        user_data: "{{ lookup('template', '../templates/user_data_bash.j2') }}"
+        wait: yes
+        wait_timeout: 500
+      with_items: "{{ droplets }}"
+      register: created_droplets
+
+####### Uncomment this block for debug purposes ########
+#    - name: print all values
+#      debug:
+#        var: created_droplets
+########################################################
+
+########## Print droplet's information #################
+#    - name: print new droplet's ID
+#      debug:
+#        msg: "ID is {{ item.droplet.id }}"
+#      with_items: "{{ created_droplets.results }}"
+#    
+#    - name: print new droplet's IP
+#      debug:
+#        msg: "IP is {{ item.droplet.ip_address }}"
+#      with_items: "{{ created_droplets.results }}"
+########################################################
+
+    - name: "Add service line to inventory file"
+      lineinfile:
+        path: "{{ inventory_file }}"
+        line: "[{{ created_hosts_group_name }}]"
+
+    - name: "Add new droplet(s) to hosts group"
+      blockinfile:
+        path: "{{ inventory_file }}"
+        insertafter: '\[{{ created_hosts_group_name }}\]'
+        block: |
+          {{ item.droplet.name }} ansible_host={{ item.droplet.ip_address }} ansible_port={{ ansible_ssh_port_do }} ansible_user={{ user_to_create }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK for droplet '{{ item.droplet.name }}' "
+      #local_action: add_host hostname={{ item.droplet.ip_address }} groupname=digitalocean_tynk
+      with_items: "{{ created_droplets.results }}"
+
+     
+    - name: "Wait for OpenSSH server to come up on newly created host(s)"
+      wait_for:
+        host: "{{ item.droplet.ip_address }}"
+        port: "{{ ansible_ssh_port_do }}"
+        # Uncomment when droplet number increases drastically
+        #delay: 60
+        search_regex: OpenSSH
+        timeout: 320
+        state: started
+      with_items: "{{ created_droplets.results }}"
+
+    - name: "Add service line to .ansible_env file"
+      lineinfile:
+        path: "{{ ansible_user_dir }}/.ansible_env"
+        regexp: "^CREATED_HOSTS_GROUP="
+        state: present
+        line: "CREATED_HOSTS_GROUP={{ created_hosts_group_name }}"
+        unsafe_writes: yes
+
+# Check this  
+    - name: "Add host(s) to in-memory inventory"
+      add_host:
+        name: "{{ item.item.name }}"
+        groups: "{{ created_hosts_group_name }}"
+        ansible_port: "{{ ansible_ssh_port_do }}" 
+        ansible_user: "{{ ansible_user_id }}"
+        ansible_host: "{{ item.droplet.ip_address }}"
+      with_items: "{{ created_droplets.results }}"
+
+# Imported playbooks
+- import_playbook: "ssh_keyscan.yaml"
+

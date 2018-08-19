@@ -1,0 +1,28 @@
+sudo: required
+
+services:
+  - docker
+
+install:
+  - docker build -t "$DOCKERHUB_REPO" .
+  
+script:
+  - echo "==> Validating build"
+  - docker run -d --name container-test1 $DOCKERHUB_REPO bash
+  - docker run -i --name container-test2  $DOCKERHUB_REPO > result-ubuntu
+  - docker container ls 
+  - sh -c "[ -s result-ubuntu ]"
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      - secure: p5miHnt3sW0RRkMuq/uMBh4zFT4xRltfLAj/IqQ93NBNh0SOCLygU4VACPZGj6o/yYN303Xj6dYUF1g9kFjyev6kfeL1LNGAwu7xzHZpDdXOi1zHqq38u9G2rdchtJC8C6a/gstW+KU+pPI0GVSfuF7SC9v1DoQFwwFFiv+rK7gYIlrV46IhQC2kNh6du6V74LaXMdUdXhWzcIpGNwRnJzv3Lo7MLoZZj9xqCrBGjnrl8t5LTJqjzRmaVjFvmQ6n3X9TtH31XMohsiebmUKkrvGxCZlFPQ1/7/DqOXzmG/ywcdXf4qN8hcvp7JM8yTVCnS4+H+X24BFmMX+337HuzWUzyyjCzeVxjsrYyk4yrb0WGu28kU2Ng0tytJ/ShXIW34l01c2jpUI31qltc+qRzzi0K6HiSJ5uMKGQ/dzszUMhthR+6lUZ8o8Qs1Xu9/C2FGcrZW8PnJVMH5Pdye/cr4Ez5QpL17JrRJOZQ9NytRaVP4yQBcF88t4MSMsDs3lLg+4XtblHt8smSRoFT3neEX+ihHxjr8rLo/MQlZuK3tHbvyHHwZE60Vm+yGhAQZweAU2dzUEO2zXwkthfWtj7MbQqYLLFC7trukYTox+6BbCKSv0ruXB6Ud5kUAC58XkDav13oprixiV5oi22VBso2rXeFAEsoDJpSoj2LE+anu0=
+      - secure: uNR3wdrFpQUPHQntYbjnUQPT8tb2nn3VSlH/8LDQQ9f6zidnyl411g1P4SU7Bn2aMKds+l0EMTjBmLakGGto0ksnUWizIhGwd/R42wYoB6Rj2l9d5Z4/YobMS0l6MM1uDahif9kQ34kPQFTOESIGf1b3YRX/YpzBubWHi6cDKx7dOBYbZFXg6vephzY6mRZ32KXsPcB5JX4urpyPWuYaLrXa0UUDiUi+ENNelP1e2Ub04BwHIQ3NuNuir8NZzI+ntfyFdV+v6DzLx4HIzEhYyMzz+N/bC9cmZLFBaVsfEvzchAJxldpp2FXxjKWYe6GgDCcMlk+g67J34yuWeMzWPYoW83TSeLbuF6NipaY1vPMBphQDFWbWnNjnrATB6WbTqSKR4byANDUVU6YhqHqvr05N5CRGfZO6sDqVYGehC8WZ++0jEKIx1dUuOBuE5tLuKK9E6iIX/B+AewMdLuv0Loz+d8sc47bRdtuNLySQXX/4C6w8URUvIpLHQda0wcEwkXSFCagI7Hd73/7hTQ7I4WcDQZ8qLpCNYV6Pxnx9ABwiQ8QzuiAjTNo2l+BjLlunSmMTZCvHjcBpkHH8/K1rGiLBv3BlYVEdQCbWMq6jLMRHjq8hLJ7u++DDXmabfxOpvZjIc/AQ1vUH27hh7W3Ag/LT9BZCEuXYdN3if99lIPY
+#    template:
+#      - "%{repository_slug} (%{commit}) : %{message} %{foo} "
+#      - "Build details: %{build_url}"
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push $DOCKERHUB_REPO

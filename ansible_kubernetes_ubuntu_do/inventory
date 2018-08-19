@@ -1,0 +1,19 @@
+[control]
+localhost ansible_connection=local
+
+[control:vars]
+ansible_python_interpreter=/usr/bin/env python3
+
+[kubernetes_do]
+# BEGIN ANSIBLE MANAGED BLOCK for droplet 'kubernetes-node-03' 
+kubernetes-node-03 ansible_host=someip ansible_port=ssh_port ansible_user=some_user
+# END ANSIBLE MANAGED BLOCK for droplet 'kubernetes-node-03' 
+# BEGIN ANSIBLE MANAGED BLOCK for droplet 'kubernetes-node-02' 
+kubernetes-node-02 ansible_host=someip ansible_port=ssh_port ansible_user=some_user
+# END ANSIBLE MANAGED BLOCK for droplet 'kubernetes-node-02' 
+# BEGIN ANSIBLE MANAGED BLOCK for droplet 'kubernetes-node-01' 
+kubernetes-node-01 ansible_host=someip ansible_port=ssh_port ansible_user=some_user
+# END ANSIBLE MANAGED BLOCK for droplet 'kubernetes-node-01' 
+# BEGIN ANSIBLE MANAGED BLOCK for droplet 'kubernetes-master' 
+kubernetes-master ansible_host=someip ansible_port=ssh_port ansible_user=some_user
+# END ANSIBLE MANAGED BLOCK for droplet 'kubernetes-master' 

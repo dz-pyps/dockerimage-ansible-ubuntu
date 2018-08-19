@@ -1,0 +1,38 @@
+---
+- name: handle ssh fingerprints
+  hosts: control
+  tasks:
+    - name: add service line to known_hosts file
+      lineinfile:
+        path: "{{ ansible_user_dir }}/.ssh/known_hosts"
+        line: "#Ansible-generated Content Below"
+        backup: yes
+        unsafe_writes: yes
+
+
+    - name: accept ansible provisioned hosts' fingerprints
+      become: false
+      changed_when: false
+      #shell: ssh-keyscan -H -p {{ ansible_ssh_port_do }} {{ item }} 2>/dev/null
+      shell: for HOST in {{ groups[created_hosts_group_name] | map('extract', hostvars, ['ansible_host']) | join(' ') }} ; do ssh-keyscan -H -p {{ ansible_ssh_port_do }} $HOST 2>/dev/null; done
+      #with_items: "{{ {{ created_hosts_group_name }} | map('extract', hostvars, ['ansible_host']) | join(', ') }}"
+      register: fingerprints
+
+    - name: add fingerprints to known_hosts file if not present
+      become: false
+      blockinfile:
+        path: "{{ ansible_user_dir }}/.ssh/known_hosts"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK for {% set service_list=[] %}{% for server in droplets %}{% do service_list.append(server.name) %}{% endfor %}{{ service_list | join(', ') }}"
+        #marker: "# {mark} ANSIBLE MANAGED BLOCK for {{ droplets.join(', ', attribute='name') }}"
+        insertafter: "#Ansible-generated Content Below"
+        content: |
+          {{ fingerprints.stdout }}
+        backup: yes
+        unsafe_writes: yes
+      #when: fingerprints.stdout not in ansible_known_hosts_file_content
+      #with_items: " {{ droplets }} "
+
+   # - name: debug statements
+   #   changed_when: false
+   #   debug:
+   #     var: "{{ fingerprints }}"

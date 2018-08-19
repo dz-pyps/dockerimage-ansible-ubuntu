@@ -1,0 +1,51 @@
+version: '3.5'
+
+services:
+  ansible:
+    user: ${USERID}:${GROUPID}
+    env_file:
+      - ansible_compose.env
+    image: dzpy/ansible_ubuntu
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    volumes:
+      # Directory for all ansible-related files (inventory, config, group vars, playbooks, etc.)
+      - type: bind
+        source: ${PWD}
+        target: /ansible_workflows
+        # read_only: true
+       # known_hosts file can be mounted inside a container in order to retain hosts' fingerprints
+      - type: bind
+        source: ${HOME}/.ssh/known_hosts
+        target: ${HOME}/.ssh/known_hosts
+        # read_only: true
+      # if you want to run ansible as a non-root user 
+      - type: bind
+        source: /etc/passwd
+        target: /etc/passwd
+        read_only: true
+      # if you want to run ansible as a non-root user
+      - type: bind
+        source: /etc/group
+        target: /etc/group
+        read_only: true
+      # public key is mounted to be able to look it up via ansible lookup plugins
+      - type: bind
+        source: ${HOME}/.ssh/id_rsa.pub
+        target: ${HOME}/.ssh/id_rsa.pub
+        read_only: true
+      # Service file
+      - type: bind
+        source: ${PWD}/.ansible_env
+        target: ${PWD}/.ansible_env
+        # read_only: true
+      # Forwarding SSH_AUTH_SOCK to a container
+      - type: bind
+        source: ${SSH_AUTH_SOCK}
+        target: /ssh-agent
+        # read_only: true
+      # Tmpfs only works if you are running Docker on Linux
+      - type: tmpfs
+        target: /home/${USER}/.ansible
+      
