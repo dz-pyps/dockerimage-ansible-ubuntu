@@ -27,11 +27,12 @@ RUN echo "===> Installing Ansible via pip3..." && \
     vault_password_file = ./vault_password_file\n \
     jinja2_extensions = jinja2.ext.do' \
     > ${SERVICE_DIR}/ansible.cfg.pre \
-# Shell opens (and truncates) the file before running the command. '>' operator will result in a target file being empty, hence we use a 'medium'
- && sed -i 's/    //g' ${SERVICE_DIR}/ansible.cfg.pre > ${SERVICE_DIR}/ansible.cfg \
+# Shell opens (and truncates) the file before running the command. '>' operator will result in a target file being empty, hence we use a 'mediator'
+ && sed 's/    //g' ${SERVICE_DIR}/ansible.cfg.pre > ${SERVICE_DIR}/ansible.cfg \
  && rm -rf ${SERVICE_DIR}/ansible.cfg.pre
 
 WORKDIR /ansible_workflows
 
 # Default command: Display 'ansible-playbook' version
-CMD [ "ansible-playbook", "--version" ]
+# CMD [ "ansible-playbook", "--version" ]
+CMD [ "cat" ]
