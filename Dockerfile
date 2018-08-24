@@ -34,5 +34,5 @@ RUN echo "===> Installing Ansible via pip3..." && \
 WORKDIR /ansible_workflows
 
 # Default command: Display 'ansible-playbook' version
-# CMD [ "ansible-playbook", "--version" ]
-CMD [ "cat" ]
+CMD [ "ansible-playbook", "--version" ]
+# CMD [ "cat" ]
