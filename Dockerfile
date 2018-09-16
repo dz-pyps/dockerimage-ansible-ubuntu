@@ -17,6 +17,7 @@ RUN echo "===> Installing Ansible via pip3..." && \
     echo "===> Installing pip modules..." && \
     pip3 install pywinrm && \
     pip3 install dopy && \
+    pip3 install pyOpenSSL && \
     echo "===> creating some directories and populating ansible.cfg..." && \
     mkdir -p ${SERVICE_DIR} && mkdir -p /ansible_workflows && \
 # ansible.cfg in a separate folder should be done on windows containers due to 777 permissions on bind mount target folder inside a container (ansible doesn't like that)
