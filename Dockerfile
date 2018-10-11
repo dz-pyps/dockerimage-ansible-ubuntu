@@ -1,4 +1,4 @@
-# Dockerfile for building Ansible image for Ubuntu (latest), with as few additional software as possible.
+# Dockerfile for building Ansible image for Ubuntu (latest), with some additional software.
 
 # Version  1.0
 
@@ -12,12 +12,13 @@ ENV SERVICE_DIR=/ansible_service_dir \
 
 RUN echo "===> Installing Ansible via pip3..." && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    apt-get install -y python3-pip openssh-client vim && \
+    apt-get install -y python3-pip openssh-client vim rsync dnsutils iputils-ping net-tools && \
     pip3 install ansible && \
     echo "===> Installing pip modules..." && \
     pip3 install pywinrm && \
     pip3 install dopy && \
     pip3 install pyOpenSSL && \
+    pip3 install jmespath && \
     echo "===> creating some directories and populating ansible.cfg..." && \
     mkdir -p ${SERVICE_DIR} && mkdir -p /ansible_workflows && \
 # ansible.cfg in a separate folder should be done on windows containers due to 777 permissions on bind mount target folder inside a container (ansible doesn't like that)
