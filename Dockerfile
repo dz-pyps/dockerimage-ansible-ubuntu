@@ -12,7 +12,7 @@ ENV SERVICE_DIR=/ansible_service_dir \
 
 RUN echo "===> Installing Ansible via pip3..." && \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    apt-get install -y python3-pip openssh-client vim rsync dnsutils iputils-ping net-tools python-dev libkrb5-dev krb5-user && \
+    apt-get install -yq python3-pip openssh-client vim rsync dnsutils iputils-ping net-tools python-dev libkrb5-dev krb5-user && \
     pip3 install ansible && \
     echo "===> Installing pip modules..." && \
     pip3 install pywinrm && \
