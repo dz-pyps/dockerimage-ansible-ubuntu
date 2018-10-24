@@ -11,7 +11,7 @@ ENV SERVICE_DIR=/ansible_service_dir \
     ANSIBLE_CONFIG=${SERVICE_DIR}/ansible.cfg
 
 RUN echo "===> Installing Ansible via pip3..." && \
-    DEBIAN_FRONTEND=noninteractive apt-get update && \
+    apt-get update && \
     apt-get install -yq python3-pip openssh-client vim rsync dnsutils iputils-ping net-tools python-dev libkrb5-dev krb5-user && \
     pip3 install ansible && \
     echo "===> Installing pip modules..." && \
