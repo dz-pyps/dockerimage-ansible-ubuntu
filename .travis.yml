@@ -12,7 +12,7 @@ script:
   - docker run -i --name container-test2  $DOCKERHUB_REPO > result-ubuntu
   - docker container ls 
   - sh -c "[ -s result-ubuntu ]"
-  - if [ $TRAVIS_TEST_RESULT -eq 0 ]; then echo '$DOCKER_PASSWORD' | docker login -u "$DOCKER_USERNAME" --password-stdin; docker push hub.docker.com/$DOCKERHUB_REPO; fi
+  - if [ $TRAVIS_TEST_RESULT -eq 0 ]; then docker logout; echo '$DOCKER_PASSWORD' | docker login -u "$DOCKER_USERNAME" --password-stdin; docker push $DOCKERHUB_REPO; fi
 
 notifications:
   email: false
